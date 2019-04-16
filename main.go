@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/just1689/pyrate-server/maps"
 )
 
@@ -22,9 +23,21 @@ func main() {
 			x = 0
 			y++
 		}
+		t.ID = fmt.Sprint(t.X, ".", t.Y)
 		chunk[i] = &t
 	}
 
 	maps.GenerateChunk(chunk, maps.SingleIsland)
+
+	conn, err := maps.Connect()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, row := range chunk {
+		maps.InsertTile(conn, row)
+
+	}
 
 }
