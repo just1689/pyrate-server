@@ -41,7 +41,7 @@ func generateSingleIsland(chunk Chunk) {
 
 	count := 1
 	for _, t := range chunk {
-		if count == 50 {
+		if count == 51 {
 			fmt.Print("\n")
 			count = 1
 		}
@@ -55,5 +55,7 @@ func generateSingleIsland(chunk Chunk) {
 		count++
 
 	}
+
+	fmt.Println(len(chunk))
 
 }

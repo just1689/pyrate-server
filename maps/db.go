@@ -6,11 +6,10 @@ import (
 	"os"
 )
 
-var conn *pgx.Conn
-var DatabaseHost = "localhost"
+var DatabaseHost = "192.168.88.26"
 var DatabaseUser = "postgres"
 var DatabasePassword = "toor"
-var DatabaseDatabase = "pydb"
+var DatabaseDatabase = "pirates"
 
 func Connect() (conn *pgx.Conn, err error) {
 	conn, err = pgx.Connect(pgx.ConnConfig{

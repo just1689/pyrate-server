@@ -8,26 +8,26 @@ import (
 func main() {
 
 	var chunk maps.Chunk
-	chunk = make([]*maps.Tile, 50*50)
+	chunk = make([]*maps.Tile, 1000*1000)
 
-	x := 0
-	y := 0
-	l := len(chunk)
+	//l := len(chunk)
 
-	for i := 0; i < l; i++ {
-		t := maps.Tile{}
-		t.X = x
-		t.Y = y
-		x++
-		if x >= 49 {
-			x = 0
-			y++
+	n := 0
+	for x := 0; x < 1000; x++ {
+		for y := 0; y < 1000; y++ {
+
+			t := maps.Tile{}
+			t.X = x
+			t.Y = y
+			t.ID = fmt.Sprint(t.X, ".", t.Y)
+			chunk[n] = &t
+			n++
 		}
-		t.ID = fmt.Sprint(t.X, ".", t.Y)
-		chunk[i] = &t
 	}
 
-	maps.GenerateChunk(chunk, maps.SingleIsland)
+	chunk.CoverInWater()
+
+	//maps.GenerateChunk(chunk, maps.SingleIsland)
 
 	conn, err := maps.Connect()
 	if err != nil {
@@ -35,7 +35,10 @@ func main() {
 		return
 	}
 
-	for _, row := range chunk {
+	for n, row := range chunk {
+		if (n == 2000) || (n == 4000) || (n == 6000) || (n == 8000) {
+			fmt.Println("At", n)
+		}
 		maps.InsertTile(conn, row)
 
 	}
