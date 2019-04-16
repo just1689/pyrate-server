@@ -105,7 +105,7 @@ func (c Chunk) FindFirstWater(x, y int, r *rand.Rand) (ok bool, t *Tile) {
 		start := time.Now()
 		for {
 			d := time.Since(start)
-			if d.Seconds() > 2 {
+			if d.Seconds() > 1 {
 				ok = false
 				fmt.Println("Took too long..")
 				return

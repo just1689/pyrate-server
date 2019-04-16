@@ -9,8 +9,8 @@ import (
 const largeIslandPercentage = 15
 
 func randXAndY(chunk Chunk, rnd *rand.Rand) (randX, randY int) {
-	randX = chunk.GetXMid() + rnd.Intn(20) - 10
-	randY = chunk.GetYMid() + rnd.Intn(20) - 10
+	randX = chunk.GetXMid() + rnd.Intn(10) - 5
+	randY = chunk.GetYMid() + rnd.Intn(10) - 5
 	return
 
 }
