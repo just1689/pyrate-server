@@ -8,13 +8,13 @@ import (
 func main() {
 
 	var chunk maps.Chunk
-	chunk = make([]*maps.Tile, 1000*1000)
+	chunk = make([]*maps.Tile, 50*50)
 
 	//l := len(chunk)
 
 	n := 0
-	for x := 0; x < 1000; x++ {
-		for y := 0; y < 1000; y++ {
+	for x := 0; x < 50; x++ {
+		for y := 0; y < 50; y++ {
 
 			t := maps.Tile{}
 			t.X = x
@@ -27,20 +27,6 @@ func main() {
 
 	chunk.CoverInWater()
 
-	//maps.GenerateChunk(chunk, maps.SingleIsland)
-
-	conn, err := maps.Connect()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	for n, row := range chunk {
-		if (n == 2000) || (n == 4000) || (n == 6000) || (n == 8000) {
-			fmt.Println("At", n)
-		}
-		maps.InsertTile(conn, row)
-
-	}
+	maps.GenerateChunk(chunk, maps.TwoIslands)
 
 }

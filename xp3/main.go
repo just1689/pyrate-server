@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const workers = 8
+const workers = 32
 
 func main() {
 
@@ -17,8 +17,14 @@ func main() {
 	//Produces x1, x2, y1, y2 for each chunk to be generated
 	work := giveMeWork(&wg)
 
+	//Start workers go generate chunks
 	for i := 0; i < workers; i++ {
+
+		//Run worker in go routine
 		go Worker(fmt.Sprint(i), work, &wg)
+
+		//Give the DB some breathing room
+		time.Sleep(1 * time.Second)
 	}
 
 	wg.Wait()
@@ -67,12 +73,14 @@ func Worker(name string, in chan *Work, wg *sync.WaitGroup) {
 				fmt.Println(err)
 				return
 			}
-			maps.GenerateChunk(chunk, maps.SingleIsland)
+
+			ct := maps.RandomizeChunckType()
+			maps.GenerateChunk(chunk, ct)
 			for _, tile := range chunk {
 				maps.UpdateTile(conn, tile)
 			}
 			d := time.Since(start)
-			fmt.Println("Chunk took", d)
+			fmt.Println("Chunk took", d, "(", ct, ")")
 		}
 		wg.Done()
 
