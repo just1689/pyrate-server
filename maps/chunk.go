@@ -21,8 +21,6 @@ func (c Chunk) GetXMin() (r int) {
 	for _, t := range c {
 		if t.X < r {
 			r = t.X
-		} else if t.X > r {
-			return
 		}
 	}
 	return
@@ -33,8 +31,6 @@ func (c Chunk) GetXMax() (r int) {
 	for _, t := range c {
 		if t.X > r {
 			r = t.X
-		} else if t.X < r {
-			return
 		}
 	}
 	return
@@ -53,8 +49,6 @@ func (c Chunk) GetYMin() (r int) {
 	for _, t := range c {
 		if t.Y < r {
 			r = t.Y
-		} else if t.Y > r {
-			return
 		}
 	}
 	return
@@ -67,8 +61,6 @@ func (c Chunk) GetYMax() (r int) {
 	for _, t := range c {
 		if t.Y > r {
 			r = t.Y
-		} else if t.Y < r {
-			return
 		}
 	}
 	return
