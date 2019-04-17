@@ -13,6 +13,8 @@ var addr = flag.String("address", ":8000", "")
 
 func main() {
 
+	flag.Parse()
+
 	fmt.Println("Starting Pirate Server on", *addr)
 	router := mux.NewRouter()
 	chat.Serve(router)
