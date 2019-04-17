@@ -19,6 +19,7 @@ type Config struct {
 	Topic         string
 	Channel       string
 	F             ReceiveFunction
+	RemoteStopper chan bool
 }
 
 type tailHandler struct {
@@ -52,15 +53,18 @@ func Subscribe(c Config) {
 
 	err = consumer.ConnectToNSQDs(nsqdTCPAddrs)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	arr := []string{}
 	arr = append(arr, c.LookupAddress)
 	err = consumer.ConnectToNSQLookupds(arr)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
+
+	//Block until told to stop
+	<-c.RemoteStopper
 
 	consumer.Stop()
 	<-consumer.StopChan
