@@ -1,7 +1,6 @@
 package maps
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -21,7 +20,7 @@ func generateSingleIsland(chunk Chunk) {
 	randSource := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(randSource)
 	randX, randY := randXAndY(chunk, rnd)
-	fmt.Println("For chunk starting a ", chunk[0].X, chunk[0].Y, " point for single island will be ", randX, randY)
+	//fmt.Println("For chunk starting a ", chunk[0].X, chunk[0].Y, " point for single island will be ", randX, randY)
 
 	//Start with just water
 	chunk.CoverInWater()
@@ -39,23 +38,22 @@ func generateSingleIsland(chunk Chunk) {
 		size--
 	}
 
-	count := 1
-	for _, t := range chunk {
-		if count == 51 {
-			fmt.Print("\n")
-			count = 1
-		}
-		if t.TileType == TileTypeWater {
-			fmt.Print("W")
-		} else if t.TileType == TileTypeLand {
-			fmt.Print("L")
-		} else {
-			fmt.Print(" ")
-		}
-		count++
+	//count := 1
+	//for _, t := range chunk {
+	//	if count == 51 {
+	//		fmt.Print("\n")
+	//		count = 1
+	//	}
+	//	if t.TileType == TileTypeWater {
+	//		fmt.Print("W")
+	//	} else if t.TileType == TileTypeLand {
+	//		fmt.Print("L")
+	//	} else {
+	//		fmt.Print(" ")
+	//	}
+	//	count++
+	//}
 
-	}
-
-	fmt.Println(len(chunk))
+	//fmt.Println(len(chunk))
 
 }
