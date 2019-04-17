@@ -37,7 +37,6 @@ type Client struct {
 	hub           *Hub
 	conn          *websocket.Conn
 	send          chan []byte
-	F             func([]byte)
 }
 
 func (c *Client) Auth() bool {
@@ -67,7 +66,7 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.F(message)
+		messageHandler(c, message)
 	}
 }
 
@@ -111,13 +110,34 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request, name string, secr
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
-	client.hub.register <- client
-
-	client.F = func(b []byte) {
-		fmt.Println(name, "says", string(b))
+	client := &Client{
+		hub:    hub,
+		conn:   conn,
+		send:   make(chan []byte, 256),
+		id:     name,
+		secret: secret,
 	}
+	client.Auth()
+	client.hub.register <- client
 
 	go client.writePump()
 	go client.readPump()
+
+	if client.Authenticated {
+
+	}
+
+}
+
+func messageHandler(client *Client, b []byte) {
+	m, err := bytesToMessage(b)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if m.Topic == "" {
+
+	}
+
 }
