@@ -23,7 +23,7 @@ func main() {
 	for i := 0; i < workers; i++ {
 
 		//Run worker in go routine
-		go Worker(fmt.Sprint(i), work, &wg)
+		StartWorker(fmt.Sprint(i), work, &wg)
 
 		//Give the DB some breathing room
 		time.Sleep(1 * time.Second)
@@ -58,7 +58,7 @@ type Work struct {
 	X1, X2, Y1, Y2 int
 }
 
-func Worker(name string, in chan *Work, wg *sync.WaitGroup) {
+func StartWorker(name string, in chan *Work, wg *sync.WaitGroup) {
 	wg.Add(1)
 	go func() {
 		fmt.Println("Worker", name, "STARTING")
