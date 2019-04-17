@@ -168,3 +168,13 @@ func (c Chunk) GetAt(x, y int) (found bool, tile *Tile) {
 	found = false
 	return
 }
+
+func (c Chunk) GetAsInterfaceSlSl() (result [][]interface{}) {
+	result = make([][]interface{}, 0)
+	for _, tile := range c {
+		row := make([]interface{}, 0)
+		row = append(row, tile.ID, tile.X, tile.Y, tile.TileType, tile.TileSkin)
+		result = append(result, row)
+	}
+	return
+}
