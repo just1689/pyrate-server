@@ -179,7 +179,7 @@ func (c Chunk) GetAsInterfaceSlSl() (result [][]interface{}) {
 	return
 }
 
-func (c Chunk) randXAndY(rnd *rand.Rand) (randX, randY int) {
+func (c Chunk) RandXAndY(rnd *rand.Rand) (randX, randY int) {
 	randX = c.GetXMid() + rnd.Intn(10) - 5
 	randY = c.GetYMid() + rnd.Intn(10) - 5
 	return

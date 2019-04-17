@@ -25,7 +25,7 @@ func generateSingleIsland(chunk model.Chunk) {
 	for size > 0 {
 		ok, t = chunk.FindFirstWater(randX, randY, rnd)
 		if !ok {
-			randX, randY = chunk.randXAndY(rnd)
+			randX, randY = chunk.RandXAndY(rnd)
 			continue
 		}
 		t.TileType = model.TileTypeLand

@@ -37,7 +37,7 @@ func generateSmallIsland(chunk model.Chunk) {
 	//Pick a starting point
 	randSource := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(randSource)
-	randX, randY := chunk.randXAndY(rnd)
+	randX, randY := chunk.RandXAndY(rnd)
 	//fmt.Println("For chunk starting a ", chunk[0].X, chunk[0].Y, " point for single island will be ", randX, randY)
 
 	//Start with just water
@@ -49,7 +49,7 @@ func generateSmallIsland(chunk model.Chunk) {
 	for size > 0 {
 		ok, t = chunk.FindFirstWater(randX, randY, rnd)
 		if !ok {
-			randX, randY = chunk.randXAndY(rnd)
+			randX, randY = chunk.RandXAndY(rnd)
 			continue
 		}
 		t.TileType = model.TileTypeLand
