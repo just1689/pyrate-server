@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-var addr = flag.String("address", ":8080", "")
+var addr = flag.String("address", ":8000", "")
 
 func main() {
 

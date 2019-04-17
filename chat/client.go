@@ -2,6 +2,7 @@ package chat
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -24,6 +25,9 @@ var (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 type Client struct {
@@ -40,6 +44,10 @@ func (c *Client) Auth() bool {
 	ok := true
 	c.Authenticated = ok
 	return ok
+}
+
+func (c *Client) Check(in string) bool {
+	return c.Auth()
 }
 
 func (c *Client) readPump() {
@@ -97,7 +105,7 @@ func (c *Client) writePump() {
 	}
 }
 
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request, name string) {
+func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request, name string, secret string) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -105,6 +113,10 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request, name string) {
 	}
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
+
+	client.F = func(b []byte) {
+		fmt.Println(name, "says", string(b))
+	}
 
 	go client.writePump()
 	go client.readPump()

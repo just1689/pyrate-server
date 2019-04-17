@@ -11,10 +11,11 @@ func Serve(router *mux.Router) {
 	hub := newHub()
 	go hub.run()
 
-	router.HandleFunc("/ws/{name:[a-z]+}", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/ws/{name:[a-z]+}/{secret:[a-z]+}", func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		name := params["name"]
-		serveWs(hub, w, r, name)
+		secret := params["secret"]
+		serveWs(hub, w, r, name, secret)
 	}).Methods("GET")
 
 }
