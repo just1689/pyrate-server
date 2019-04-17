@@ -7,17 +7,18 @@ import (
 	"time"
 )
 
+const workers = 8
+
 func main() {
 
+	//Figure out when all work is done
 	var wg sync.WaitGroup
 
-	wg.Add(1)
+	//Produces x1, x2, y1, y2 for each chunk to be generated
 	work := giveMeWork(&wg)
 
-	workers := 8
 	for i := 0; i < workers; i++ {
 		go Worker(fmt.Sprint(i), work, &wg)
-
 	}
 
 	wg.Wait()
@@ -25,6 +26,7 @@ func main() {
 }
 
 func giveMeWork(wg *sync.WaitGroup) chan *Work {
+	wg.Add(1)
 	result := make(chan *Work)
 	go func() {
 		for x := 0; x < 1000; x += 50 {
