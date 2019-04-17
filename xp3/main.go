@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/just1689/pyrate-server/db"
 	"github.com/just1689/pyrate-server/maps"
+	"github.com/just1689/pyrate-server/model"
 	"sync"
 	"time"
 )
@@ -60,14 +62,14 @@ func Worker(name string, in chan *Work, wg *sync.WaitGroup) {
 	wg.Add(1)
 	go func() {
 		fmt.Println("Worker", name, "STARTING")
-		conn, err := maps.Connect()
+		conn, err := db.Connect()
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		for work := range in {
 			start := time.Now()
-			chunk, err := maps.GetTilesChunk(conn, work.X1, work.X2, work.Y1, work.Y2)
+			chunk, err := model.GetTilesChunk(conn, work.X1, work.X2, work.Y1, work.Y2)
 			//fmt.Println("Worker", name, "received chunk starting at", work.X1, work.Y1)
 			if err != nil {
 				fmt.Println(err)
@@ -77,7 +79,7 @@ func Worker(name string, in chan *Work, wg *sync.WaitGroup) {
 			ct := maps.RandomizeChunckType()
 			maps.GenerateChunk(chunk, ct)
 			for _, tile := range chunk {
-				maps.UpdateTile(conn, tile)
+				model.UpdateTile(conn, tile)
 			}
 			d := time.Since(start)
 			fmt.Println("Chunk took", d, "(", ct, ")")

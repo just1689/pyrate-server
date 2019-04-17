@@ -1,5 +1,7 @@
 package maps
 
-func generateNothing(chunk Chunk) {
+import "github.com/just1689/pyrate-server/model"
+
+func generateNothing(chunk model.Chunk) {
 	chunk.CoverInWater()
 }

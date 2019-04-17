@@ -1,4 +1,4 @@
-package maps
+package model
 
 import (
 	"fmt"

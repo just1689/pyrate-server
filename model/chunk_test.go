@@ -1,6 +1,8 @@
-package maps
+package model
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestChunk_CoverInWater(t *testing.T) {
 	var c Chunk

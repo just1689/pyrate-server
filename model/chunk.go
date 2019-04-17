@@ -1,4 +1,4 @@
-package maps
+package model
 
 import (
 	"fmt"
@@ -177,4 +177,11 @@ func (c Chunk) GetAsInterfaceSlSl() (result [][]interface{}) {
 		result = append(result, row)
 	}
 	return
+}
+
+func (c Chunk) randXAndY(rnd *rand.Rand) (randX, randY int) {
+	randX = c.GetXMid() + rnd.Intn(10) - 5
+	randY = c.GetYMid() + rnd.Intn(10) - 5
+	return
+
 }

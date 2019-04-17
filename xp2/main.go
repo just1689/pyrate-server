@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/just1689/pyrate-server/db"
 	"github.com/just1689/pyrate-server/maps"
+	"github.com/just1689/pyrate-server/model"
 	"sync"
 )
 
@@ -23,7 +25,7 @@ func main() {
 	for chunk := range chunks {
 		pool <- func() {
 			l := chunk
-			maps.GenerateChunk(l, maps.SingleIsland)
+			maps.GenerateChunk(l, model.SingleIsland)
 			for _, tile := range l {
 				(rote.Next()) <- tile
 				wg.Done()
@@ -34,11 +36,11 @@ func main() {
 
 }
 
-func ReadChunks(inc *sync.WaitGroup) (out chan maps.Chunk) {
-	out = make(chan maps.Chunk, 40) //40 chunks
+func ReadChunks(inc *sync.WaitGroup) (out chan model.Chunk) {
+	out = make(chan model.Chunk, 40) //40 chunks
 	go func() {
 		//fmt.Println("Fetching x: ", x1, "to", x2, " and y: ", y1, "to", y2)
-		conn, err := maps.Connect()
+		conn, err := db.Connect()
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -53,7 +55,7 @@ func ReadChunks(inc *sync.WaitGroup) (out chan maps.Chunk) {
 				y1 := y
 				y2 := y + 49
 
-				chunk, err := maps.GetTilesChunk(conn, x1, x2, y1, y2)
+				chunk, err := model.GetTilesChunk(conn, x1, x2, y1, y2)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -70,15 +72,15 @@ func ReadChunks(inc *sync.WaitGroup) (out chan maps.Chunk) {
 	return
 }
 
-func BuildUpdater() (in chan *maps.Tile) {
-	in = make(chan *maps.Tile, 1000)
-	c, err := maps.Connect()
+func BuildUpdater() (in chan *model.Tile) {
+	in = make(chan *model.Tile, 1000)
+	c, err := db.Connect()
 	if err != nil {
 		fmt.Println(err)
 	}
 	go func() {
 		for item := range in {
-			maps.UpdateTile(c, item)
+			model.UpdateTile(c, item)
 		}
 
 	}()
@@ -106,14 +108,14 @@ func CreatePool(size int, wg *sync.WaitGroup) (in chan TinyFunction) {
 }
 
 type Rote struct {
-	in chan chan *maps.Tile
+	in chan chan *model.Tile
 }
 
 func (r Rote) Start(size int) {
-	r.in = make(chan chan *maps.Tile, size)
+	r.in = make(chan chan *model.Tile, size)
 }
 
-func (r Rote) Next() chan *maps.Tile {
+func (r Rote) Next() chan *model.Tile {
 	res := <-r.in
 	r.in <- res
 	return res
