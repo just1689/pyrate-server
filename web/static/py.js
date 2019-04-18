@@ -34,13 +34,16 @@ function StartPirates() {
 
 
         // Sphere
-        var sphereMaterial = new BABYLON.StandardMaterial("sphereMaterial", scene);
+        const sphereMaterial = new BABYLON.StandardMaterial("sphereMaterial", scene);
         sphereMaterial.diffuseTexture = new BABYLON.Texture("//www.babylonjs.com/assets/wood.jpg", scene);
 
-        var sphere = BABYLON.Mesh.CreateSphere("sphere", 16, 10, scene);
+        const sphere = BABYLON.Mesh.CreateSphere("sphere", 16, 10, scene);
         // sphere.position.y = 20;
         sphere.material = sphereMaterial;
 
+
+        const box = BABYLON.MeshBuilder.CreateBox("box", {height: 16, width: 10}, scene);
+        box.position.y = 100;
 
 
         // Water
@@ -56,6 +59,7 @@ function StartPirates() {
         water.addToRenderList(skybox);
         water.addToRenderList(ground);
         water.addToRenderList(sphere);
+        water.addToRenderList(box);
         waterMesh.material = water;
 
         return scene;
