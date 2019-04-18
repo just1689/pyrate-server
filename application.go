@@ -19,7 +19,7 @@ func main() {
 	fmt.Println("Starting Pirate Server on", *addr)
 	router := mux.NewRouter()
 	chat.Serve(router)
-	router.HandleFunc("/", handleWeb)
+	router.HandleFunc("/", handleHome)
 	setupStaticHost(router)
 
 	http.Handle("/", router)
@@ -33,7 +33,7 @@ func setupStaticHost(router *mux.Router) {
 
 }
 
-func handleWeb(w http.ResponseWriter, r *http.Request) {
+func handleHome(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadFile("web/index.html")
 	if err != nil {
 		fmt.Println(err)
