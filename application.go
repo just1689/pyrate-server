@@ -12,8 +12,8 @@ import (
 )
 
 var addr = flag.String("address", ":8000", "")
-var nAddr = flag.String("nsqaddress", ":8000", "")
-var lnAddr = flag.String("lnsqaddress", ":8000", "")
+var nAddr = flag.String("nsqaddress", "192.168.88.26:30000", "")
+var lnAddr = flag.String("lnsqaddress", "http://192.168.88.26:30004", "")
 
 func main() {
 
