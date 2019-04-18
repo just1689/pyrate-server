@@ -19,24 +19,25 @@ func main() {
 	fmt.Println("Starting Pirate Server on", *addr)
 	router := mux.NewRouter()
 	chat.Serve(router)
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		b, err := ioutil.ReadFile("web/index.html")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		w.Write(b)
-	})
-	router.HandleFunc("/py.js", func(w http.ResponseWriter, r *http.Request) {
-		b, err := ioutil.ReadFile("web/py.js")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		w.Write(b)
-	})
+	router.HandleFunc("/", handleWeb)
+	setupStaticHost(router)
 
 	http.Handle("/", router)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 
+}
+
+func setupStaticHost(router *mux.Router) {
+	dir := "web/static/"
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+
+}
+
+func handleWeb(w http.ResponseWriter, r *http.Request) {
+	b, err := ioutil.ReadFile("web/index.html")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	w.Write(b)
 }
