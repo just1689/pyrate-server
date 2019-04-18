@@ -2,6 +2,7 @@ package chat
 
 import (
 	"flag"
+	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -15,6 +16,7 @@ func Serve(router *mux.Router, subscriber func(topic, channel string) chan bool)
 		params := mux.Vars(r)
 		name := params["name"]
 		secret := params["secret"]
+		fmt.Println("Connected", name, secret)
 		serveWs(hub, w, r, name, secret, subscriber)
 	}).Methods("GET")
 
