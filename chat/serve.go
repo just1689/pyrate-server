@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Serve(router *mux.Router) {
+func Serve(router *mux.Router, subscriber func(topic, channel string) chan bool) {
 	flag.Parse()
 	hub := newHub()
 	go hub.run()
@@ -15,7 +15,7 @@ func Serve(router *mux.Router) {
 		params := mux.Vars(r)
 		name := params["name"]
 		secret := params["secret"]
-		serveWs(hub, w, r, name, secret)
+		serveWs(hub, w, r, name, secret, subscriber)
 	}).Methods("GET")
 
 }

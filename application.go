@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/just1689/pyrate-server/chat"
+	"github.com/just1689/pyrate-server/queues"
 	"io/ioutil"
 	"log"
 	"net/http"
 )
 
 var addr = flag.String("address", ":8000", "")
+var nAddr = flag.String("nsqaddress", ":8000", "")
+var lnAddr = flag.String("lnsqaddress", ":8000", "")
 
 func main() {
 
@@ -18,7 +21,7 @@ func main() {
 
 	fmt.Println("Starting Pirate Server on", *addr)
 	router := mux.NewRouter()
-	chat.Serve(router)
+	chat.Serve(router, Subscriber)
 	router.HandleFunc("/", handleHome)
 	setupStaticHost(router)
 
@@ -40,4 +43,22 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(b)
+}
+
+func Subscriber(topic, channel string) (stopper chan bool) {
+	stopper = make(chan bool)
+	go func() {
+		config := queues.Config{
+			Topic:         topic,
+			Channel:       channel,
+			LookupAddress: *lnAddr,
+			Address:       *nAddr,
+			RemoteStopper: stopper,
+			F: func(c *queues.Config, b []byte) {
+				//TODO: implement
+			},
+		}
+		queues.Subscribe(config)
+	}()
+	return
 }

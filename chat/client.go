@@ -37,12 +37,18 @@ type Client struct {
 	hub           *Hub
 	conn          *websocket.Conn
 	send          chan []byte
+	StopNSQ       chan bool
 }
 
 func (c *Client) Auth() bool {
 	ok := true
 	c.Authenticated = ok
 	return ok
+}
+
+func (c *Client) close() {
+	c.StopNSQ <- true
+
 }
 
 func (c *Client) Check(in string) bool {
@@ -53,6 +59,10 @@ func (c *Client) readPump() {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
+
+		//Close the nsq thing
+		c.close()
+
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -104,7 +114,7 @@ func (c *Client) writePump() {
 	}
 }
 
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request, name string, secret string) {
+func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request, name string, secret string, subscriber func(topic, channel string) chan bool) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -124,7 +134,7 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request, name string, secr
 	go client.readPump()
 
 	if client.Authenticated {
-
+		client.StopNSQ = subscriber(fmt.Sprint("player."+client.id), "all")
 	}
 
 }
