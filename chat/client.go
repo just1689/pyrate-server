@@ -134,7 +134,7 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request, name string, secr
 	go client.readPump()
 
 	if client.Authenticated {
-		client.StopNSQ = subscriber(fmt.Sprint("player."+client.id), "all")
+		//client.StopNSQ = subscriber(fmt.Sprint("player."+client.id), "all")
 	}
 
 }
