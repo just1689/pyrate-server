@@ -11,6 +11,7 @@ class Stash {
 
     static box
     static mapTiles = new Map()
+    static mapTilesCounter = 0
     static mapTilesBin = new Map()
 }
 
@@ -154,20 +155,55 @@ function wsOnOpen() {
 }
 
 function handleTile(t) {
+
     if (Stash.mapTilesBin.size === 0) {
         createTileByClone(t)
+        return
     }
+
+    for (let pair of Stash.mapTilesBin) {
+        let tile = pair[1]
+        updateTileToTileObject(tile, t)
+    }
+
 }
 
 function createTileByClone(t) {
-    let box = Stash.box.clone("box" + t.X + t.Y)
+
+    let box = Stash.box.clone("box" + Stash.mapTilesCounter++)
     box.material = Stash.materials.get("soilMaterial")
-    box.position.y = 2
-    box.position.x = t.X * 16
-    box.position.z = t.Y * 16
-    box.tag = t
-    box.visibility = 1
+    updateTileToTileObject(box, t)
     Stash.mapTiles.set(t.ID, box)
+
+}
+
+function updateTileToTileObject(tTile, tObject) {
+    tTile.material = Stash.materials.get("soilMaterial")
+    tTile.position.y = 2
+    tTile.position.x = tObject.X * 16
+    tTile.position.z = tObject.Y * 16
+    tTile.tag = tObject
+    tTile.visibility = 1
+
+}
+
+
+//Removes tiles from view (render) if they are within an area
+function GarbageCollectTiles(minX, maxX, minY, maxY) {
+    let marked = []
+    for (let pair of Stash.mapTiles) {
+        let t = pair[1].tag
+        if (t.X >= minX && t.X <= maxX && t.Y >= minY && t.Y <= maxY) {
+            marked.push(t.ID)
+            console.log("Found to GC! " + t.ID)
+        }
+    }
+
+    for (let t of marked) {
+        let tile = Stash.mapTiles.get(t.ID)
+        tile.visibility = 0
+        Stash.mapTilesBin.set(t.ID, tile)
+    }
 
 }
 
