@@ -2,7 +2,10 @@ package chat
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"github.com/just1689/pyrate-server/db"
+	"github.com/just1689/pyrate-server/model"
 	"log"
 	"net/http"
 	"time"
@@ -146,7 +149,43 @@ func messageHandler(client *Client, b []byte) {
 		return
 	}
 
-	if m.Topic == "" {
+	fmt.Println("Got message")
+
+	if m.Topic == "map-request" {
+
+		body := MapRequestBody{}
+		err := json.Unmarshal(m.Body, &body)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		conn, err := db.Connect()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		c := model.GetTilesChunkAsync(conn, body.X-25, body.X+25, body.Y-25, body.Y+25)
+		count := 0
+		for tile := range c {
+			if tile.TileType == model.TileTypeWater {
+
+				continue
+			}
+			b, err := json.Marshal(*tile)
+			m := Message{
+				Topic: "tile",
+				Body:  b,
+			}
+			mb, err := json.Marshal(m)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			client.send <- mb
+			count++
+		}
+		fmt.Println("Sent", count, "tiles")
 
 	}
 
