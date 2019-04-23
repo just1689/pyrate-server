@@ -167,8 +167,7 @@ function createTileByClone(t) {
     box.position.z = t.Y * 16
     box.tag = t
     box.visibility = 1
-
-    // Stash.mapTiles.set(t.ID, box)
+    Stash.mapTiles.set(t.ID, box)
 
 }
 
