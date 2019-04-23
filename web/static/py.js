@@ -7,6 +7,7 @@ class Stash {
     static ws
     static sceneItems = new Map()
     static light
+    static water
 }
 
 function createEngine() {
@@ -37,6 +38,18 @@ function createMaterials() {
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
     skyboxMaterial.disableLighting = true;
     Stash.materials.set("skyboxMaterial", skyboxMaterial)
+
+    // Water
+    const waterMaterial = new BABYLON.WaterMaterial("waterMaterial", Stash.scene, new BABYLON.Vector2(1024, 1024))
+    waterMaterial.backFaceCulling = true
+    waterMaterial.bumpTexture = new BABYLON.Texture("static/textures/waterbump.png", Stash.scene)
+    waterMaterial.windForce = -5
+    waterMaterial.waveHeight = 0.5
+    waterMaterial.bumpHeight = 0.1
+    waterMaterial.waveLength = 0.1
+    waterMaterial.colorBlendFactor = 0
+    Stash.materials.set("waterMaterial", waterMaterial)
+
 
     // Ground
     const soilMaterial = new BABYLON.StandardMaterial("soilMaterial", Stash.scene);
@@ -74,6 +87,14 @@ function createGround() {
 
 }
 
+function createWater() {
+    Stash.water = BABYLON.Mesh.CreateGround("waterMesh", 512, 512, 32, Stash.scene, false)
+    Stash.materials.get("waterMaterial").addToRenderList(Stash.sceneItems.get("skybox"))
+    Stash.materials.get("waterMaterial").addToRenderList(Stash.sceneItems.get("ground"))
+    Stash.water.material = Stash.materials.get("waterMaterial")
+
+}
+
 
 function StartBabylonEngine() {
 
@@ -86,32 +107,7 @@ function StartBabylonEngine() {
     createGround()
 
 
-    // Sphere
-    const sphere = BABYLON.Mesh.CreateSphere("sphere", 16, 10, Stash.scene)
-    sphere.position.y = 7
-    sphere.material = Stash.materials.get("woodMaterial")
-
-
-    const box = BABYLON.MeshBuilder.CreateBox("box", {height: 1, width: 16, depth: 16}, Stash.scene)
-    box.material = Stash.materials.get("soilMaterial")
-    box.position.y = 2
-
-
-    // Water
-    const waterMesh = BABYLON.Mesh.CreateGround("waterMesh", 512, 512, 32, Stash.scene, false)
-    const water = new BABYLON.WaterMaterial("water", Stash.scene, new BABYLON.Vector2(1024, 1024))
-    water.backFaceCulling = true
-    water.bumpTexture = new BABYLON.Texture("static/textures/waterbump.png", Stash.scene)
-    water.windForce = -5
-    water.waveHeight = 0.5
-    water.bumpHeight = 0.1
-    water.waveLength = 0.1
-    water.colorBlendFactor = 0
-    water.addToRenderList(Stash.sceneItems.get("skybox"))
-    water.addToRenderList(Stash.sceneItems.get("ground"))
-    water.addToRenderList(sphere)
-    // water.addToRenderList(box);
-    waterMesh.material = water
+    createWater()
 
 
     Stash.engine.runRenderLoop(function () {
@@ -125,6 +121,24 @@ function StartBabylonEngine() {
     });
 
 }
+
+function playground() {
+    // Sphere
+    const sphere = BABYLON.Mesh.CreateSphere("sphere", 16, 10, Stash.scene)
+    sphere.position.y = 7
+    sphere.material = Stash.materials.get("woodMaterial")
+
+
+    const box = BABYLON.MeshBuilder.CreateBox("box", {height: 1, width: 16, depth: 16}, Stash.scene)
+    box.material = Stash.materials.get("soilMaterial")
+    box.position.y = 2
+
+    Stash.materials.get("waterMaterial").addToRenderList(sphere)
+    Stash.materials.get("waterMaterial").addToRenderList(box)
+
+
+}
+
 
 function ConnectWS() {
     Stash.ws = new WebSocket("ws://localhost:8000/ws/test/er");
