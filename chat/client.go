@@ -149,8 +149,6 @@ func messageHandler(client *Client, b []byte) {
 		return
 	}
 
-	fmt.Println("Got message")
-
 	if m.Topic == "map-request" {
 
 		body := MapRequestBody{}
@@ -165,11 +163,10 @@ func messageHandler(client *Client, b []byte) {
 			fmt.Println(err)
 			return
 		}
-		c := model.GetTilesChunkAsync(conn, body.X-25, body.X+25, body.Y-25, body.Y+25)
+		c := model.GetTilesChunkAsync(conn, body.X-100, body.X+100, body.Y-100, body.Y+100)
 		count := 0
 		for tile := range c {
 			if tile.TileType == model.TileTypeWater {
-
 				continue
 			}
 			b, err := json.Marshal(*tile)
