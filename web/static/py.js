@@ -154,17 +154,23 @@ function wsOnOpen() {
     console.log("Socket open...")
 }
 
-function handleTile(t) {
+function handleTile(tObject) {
 
     if (Stash.mapTilesBin.size === 0) {
-        createTileByClone(t)
+        createTileByClone(tObject)
         return
     }
 
+    let tTile
     for (let pair of Stash.mapTilesBin) {
-        let tile = pair[1]
-        updateTileToTileObject(tile, t)
+        tTile = pair[1]
+        break
     }
+
+    Stash.mapTilesBin.delete(tTile.tag.ID)
+    Stash.mapTiles.set(tObject.ID, tTile)
+    updateTileToTileObject(tTile, tObject)
+
 
 }
 
@@ -195,14 +201,14 @@ function GarbageCollectTiles(minX, maxX, minY, maxY) {
         let t = pair[1].tag
         if (t.X >= minX && t.X <= maxX && t.Y >= minY && t.Y <= maxY) {
             marked.push(t.ID)
-            console.log("Found to GC! " + t.ID)
         }
     }
 
-    for (let t of marked) {
-        let tile = Stash.mapTiles.get(t.ID)
+    for (let id of marked) {
+        let tile = Stash.mapTiles.get(id)
+        Stash.mapTiles.delete(id)
         tile.visibility = 0
-        Stash.mapTilesBin.set(t.ID, tile)
+        Stash.mapTilesBin.set(id, tile)
     }
 
 }
