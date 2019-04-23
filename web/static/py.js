@@ -157,5 +157,6 @@ function wsOnClose() {
 }
 
 function sendWs(m) {
+    console.log("Sending: " + m)
     Stash.ws.send(m)
 }
