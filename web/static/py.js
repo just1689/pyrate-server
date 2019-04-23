@@ -156,6 +156,6 @@ function wsOnClose() {
     setTimeout(ConnectWS, 2000)
 }
 
-function send(m) {
+function sendWs(m) {
     Stash.ws.send(m)
 }
