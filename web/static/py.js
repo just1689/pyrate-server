@@ -10,6 +10,33 @@ class Stash {
     static water
 }
 
+function StartBabylonEngine() {
+
+    createEngine()
+    createScene()
+    createCamera()
+    createMaterials()
+    createLight()
+    createSkyBox()
+    createGround()
+
+
+    createWater()
+
+
+    Stash.engine.runRenderLoop(() => {
+        if (Stash.scene) {
+            Stash.scene.render()
+        }
+    })
+
+    window.addEventListener("resize", () => {
+        Stash.engine.resize()
+    })
+
+}
+
+
 function createEngine() {
     Stash.canvas = document.getElementById("renderCanvas");
     Stash.engine = new BABYLON.Engine(Stash.canvas, true, {preserveDrawingBuffer: true, stencil: true});
@@ -96,31 +123,7 @@ function createWater() {
 }
 
 
-function StartBabylonEngine() {
-
-    createEngine()
-    createScene()
-    createCamera()
-    createMaterials()
-    createLight()
-    createSkyBox()
-    createGround()
-
-
-    createWater()
-
-
-    Stash.engine.runRenderLoop(() => {
-        if (Stash.scene) {
-            Stash.scene.render()
-        }
-    })
-
-    window.addEventListener("resize", () => {
-        Stash.engine.resize()
-    })
-
-}
+c
 
 function playground() {
     const sphere = BABYLON.Mesh.CreateSphere("sphere", 16, 10, Stash.scene)
