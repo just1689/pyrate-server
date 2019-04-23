@@ -123,11 +123,9 @@ function StartBabylonEngine() {
 }
 
 function playground() {
-    // Sphere
     const sphere = BABYLON.Mesh.CreateSphere("sphere", 16, 10, Stash.scene)
     sphere.position.y = 7
     sphere.material = Stash.materials.get("woodMaterial")
-
 
     const box = BABYLON.MeshBuilder.CreateBox("box", {height: 1, width: 16, depth: 16}, Stash.scene)
     box.material = Stash.materials.get("soilMaterial")
@@ -135,8 +133,6 @@ function playground() {
 
     Stash.materials.get("waterMaterial").addToRenderList(sphere)
     Stash.materials.get("waterMaterial").addToRenderList(box)
-
-
 }
 
 
@@ -145,7 +141,6 @@ function ConnectWS() {
     Stash.ws.onopen = wsOnOpen
     Stash.ws.onmessage = wsOnMessage
     Stash.ws.onclose = wsOnClose
-
 }
 
 function wsOnOpen() {
@@ -159,7 +154,6 @@ function wsOnMessage(evt) {
 function wsOnClose() {
     console.log("Socket closed...")
     setTimeout(ConnectWS, 2000)
-
 }
 
 function send(m) {
