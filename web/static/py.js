@@ -10,6 +10,8 @@ class Stash {
     static water
 
     static box
+    static mapTiles = new Map()
+    static mapTilesBin = new Map()
 }
 
 function StartBabylonEngine() {
@@ -133,7 +135,7 @@ function playground() {
     Stash.box = BABYLON.MeshBuilder.CreateBox("box", {height: 1, width: 16, depth: 16}, Stash.scene)
     Stash.box.material = Stash.materials.get("soilMaterial")
     Stash.box.position.y = 2
-    Stash.box.opacity = 0
+    Stash.box.visibility = 0
 
     Stash.materials.get("waterMaterial").addToRenderList(sphere)
     Stash.materials.get("waterMaterial").addToRenderList(Stash.box)
@@ -152,20 +154,24 @@ function wsOnOpen() {
 }
 
 function handleTile(t) {
-
-    if (t.TileType === "water") {
-        return
+    if (Stash.mapTilesBin.size === 0) {
+        createTileByClone(t)
     }
+}
 
+function createTileByClone(t) {
     let box = Stash.box.clone("box" + t.X + t.Y)
     box.material = Stash.materials.get("soilMaterial")
     box.position.y = 2
     box.position.x = t.X * 16
     box.position.z = t.Y * 16
-    box.visibility = 0
+    box.tag = t
+    box.visibility = 1
 
+    // Stash.mapTiles.set(t.ID, box)
 
 }
+
 
 function wsOnMessage(evt) {
     const o = JSON.parse(evt.data)
