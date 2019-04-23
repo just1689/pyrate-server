@@ -9,6 +9,11 @@ class Stash {
     static light
 }
 
+function createEngine() {
+    Stash.canvas = document.getElementById("renderCanvas");
+    Stash.engine = new BABYLON.Engine(Stash.canvas, true, {preserveDrawingBuffer: true, stencil: true});
+
+}
 
 function createScene() {
     Stash.scene = new BABYLON.Scene(Stash.engine)
@@ -22,6 +27,8 @@ function createCamera() {
 }
 
 function createMaterials() {
+
+    // Sky
     const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", Stash.scene);
     skyboxMaterial.backFaceCulling = false;
     skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("static/textures/TropicalSunnyDay", Stash.scene);
@@ -31,13 +38,16 @@ function createMaterials() {
     skyboxMaterial.disableLighting = true;
     Stash.materials.set("skyboxMaterial", skyboxMaterial)
 
+    // Ground
+    const soilMaterial = new BABYLON.StandardMaterial("soilMaterial", Stash.scene);
+    soilMaterial.diffuseTexture = new BABYLON.Texture("static/textures/soil.jpg", Stash.scene);
+    Stash.materials.set("soilMaterial", soilMaterial)
+
+    // Items on the map
     const woodMaterial = new BABYLON.StandardMaterial("woodMaterial", Stash.scene);
     woodMaterial.diffuseTexture = new BABYLON.Texture("static/textures/wood.jpg", Stash.scene);
     Stash.materials.set("woodMaterial", woodMaterial)
 
-    const soilMaterial = new BABYLON.StandardMaterial("soilMaterial", Stash.scene);
-    soilMaterial.diffuseTexture = new BABYLON.Texture("static/textures/soil.jpg", Stash.scene);
-    Stash.materials.set("soilMaterial", soilMaterial)
 
 }
 
@@ -67,10 +77,7 @@ function createGround() {
 
 function StartBabylonEngine() {
 
-    Stash.canvas = document.getElementById("renderCanvas");
-    Stash.engine = new BABYLON.Engine(Stash.canvas, true, {preserveDrawingBuffer: true, stencil: true});
-
-
+    createEngine()
     createScene()
     createCamera()
     createMaterials()
