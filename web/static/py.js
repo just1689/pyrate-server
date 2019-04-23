@@ -152,6 +152,9 @@ function ConnectWS() {
 
 function wsOnOpen() {
     console.log("Socket open...")
+
+    //???
+    requestMap()
 }
 
 function handleTile(tObject) {
