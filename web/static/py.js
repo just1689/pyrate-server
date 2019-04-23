@@ -8,6 +8,8 @@ class Stash {
     static sceneItems = new Map()
     static light
     static water
+
+    static box
 }
 
 function StartBabylonEngine() {
@@ -123,19 +125,18 @@ function createWater() {
 }
 
 
-c
-
 function playground() {
     const sphere = BABYLON.Mesh.CreateSphere("sphere", 16, 10, Stash.scene)
     sphere.position.y = 7
     sphere.material = Stash.materials.get("woodMaterial")
 
-    const box = BABYLON.MeshBuilder.CreateBox("box", {height: 1, width: 16, depth: 16}, Stash.scene)
-    box.material = Stash.materials.get("soilMaterial")
-    box.position.y = 2
+    Stash.box = BABYLON.MeshBuilder.CreateBox("box", {height: 1, width: 16, depth: 16}, Stash.scene)
+    Stash.box.material = Stash.materials.get("soilMaterial")
+    Stash.box.position.y = 2
+    Stash.box.opacity = 0
 
     Stash.materials.get("waterMaterial").addToRenderList(sphere)
-    Stash.materials.get("waterMaterial").addToRenderList(box)
+    Stash.materials.get("waterMaterial").addToRenderList(Stash.box)
 }
 
 
@@ -150,7 +151,29 @@ function wsOnOpen() {
     console.log("Socket open...")
 }
 
+function handleTile(t) {
+
+    if (t.TileType === "water") {
+        return
+    }
+
+    let box = Stash.box.clone("box" + t.X + t.Y)
+    box.material = Stash.materials.get("soilMaterial")
+    box.position.y = 2
+    box.position.x = t.X * 16
+    box.position.z = t.Y * 16
+    box.visibility = 0
+
+
+}
+
 function wsOnMessage(evt) {
+    const o = JSON.parse(evt.data)
+    if (o.topic === "tile") {
+        handleTile(o.body)
+        return
+    }
+
     console.log("ws> " + evt.data)
 }
 
@@ -162,4 +185,16 @@ function wsOnClose() {
 function sendWs(m) {
     console.log("Sending: " + m)
     Stash.ws.send(m)
+}
+
+function requestMap() {
+    let o = {
+        topic: "map-request",
+        body: {
+            X: 0,
+            Y: 0,
+        }
+    }
+    let msg = JSON.stringify(o)
+    sendWs(msg)
 }
