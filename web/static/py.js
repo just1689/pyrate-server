@@ -6,6 +6,19 @@ class Stash {
     static materials = new Map()
     static ws
     static sceneItems = new Map()
+    static light
+}
+
+
+function createScene() {
+    Stash.scene = new BABYLON.Scene(Stash.engine)
+
+}
+
+function createCamera() {
+    Stash.camera = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 2, Math.PI / 4, 100, BABYLON.Vector3.Zero(), Stash.scene)
+    Stash.camera.attachControl(Stash.canvas, true)
+
 }
 
 function createMaterials() {
@@ -28,19 +41,9 @@ function createMaterials() {
 
 }
 
-function createScene() {
-    Stash.scene = new BABYLON.Scene(Stash.engine)
-
-}
-
-function createCamera() {
-    Stash.camera = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 2, Math.PI / 4, 100, BABYLON.Vector3.Zero(), Stash.scene)
-    Stash.camera.attachControl(Stash.canvas, true)
-
-}
 
 function createLight() {
-    const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), Stash.scene)
+    Stash.light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), Stash.scene)
 
 }
 
@@ -72,9 +75,7 @@ function StartBabylonEngine() {
     createCamera()
     createMaterials()
     createLight()
-
     createSkyBox()
-
     createGround()
 
 
