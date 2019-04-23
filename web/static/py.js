@@ -121,22 +121,24 @@ function StartBabylonEngine() {
 
 function ConnectWS() {
     Stash.ws = new WebSocket("ws://localhost:8000/ws/test/er");
-
-    Stash.ws.onopen = function () {
-        console.log("Socket open...")
-    }
-
-    Stash.ws.onmessage = wsMessageIn
-
-    Stash.ws.onclose = function () {
-        console.log("Socket closed...")
-        setTimeout(ConnectWS, 2000)
-    }
+    Stash.ws.onopen = wsOnOpen
+    Stash.ws.onmessage = wsOnMessage
+    Stash.ws.onclose = wsOnClose
 
 }
 
-function wsMessageIn(evt) {
+function wsOnOpen() {
+    console.log("Socket open...")
+}
+
+function wsOnMessage(evt) {
     console.log("ws> " + evt.data)
+}
+
+function wsOnClose() {
+    console.log("Socket closed...")
+    setTimeout(ConnectWS, 2000)
+
 }
 
 function send(m) {
