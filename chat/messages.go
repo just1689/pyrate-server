@@ -12,3 +12,8 @@ func bytesToMessage(b []byte) (m *Message, err error) {
 	err = json.Unmarshal(b, m)
 	return
 }
+
+type MapRequestBody struct {
+	X int `json:"X"`
+	Y int `json:"Y"`
+}
