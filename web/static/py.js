@@ -110,15 +110,15 @@ function StartBabylonEngine() {
     createWater()
 
 
-    Stash.engine.runRenderLoop(function () {
+    Stash.engine.runRenderLoop(() => {
         if (Stash.scene) {
             Stash.scene.render()
         }
-    });
+    })
 
-    window.addEventListener("resize", function () {
+    window.addEventListener("resize", () => {
         Stash.engine.resize()
-    });
+    })
 
 }
 
