@@ -1,4 +1,9 @@
 class Stash {
+
+    //Constants
+    static TILE_SIZE = 16
+
+    //Useful state
     static engine
     static scene
     static canvas
@@ -13,6 +18,12 @@ class Stash {
     static mapTiles = new Map()
     static mapTilesCounter = 0
     static mapTilesBin = new Map()
+
+    static mapOffsetX = 0
+    static mapOffsetY = 0
+
+
+
 }
 
 function StartBabylonEngine() {
@@ -129,11 +140,11 @@ function createWater() {
 
 
 function playground() {
-    const sphere = BABYLON.Mesh.CreateSphere("sphere", 16, 10, Stash.scene)
+    const sphere = BABYLON.Mesh.CreateSphere("sphere", Stash.TILE_SIZE, 10, Stash.scene)
     sphere.position.y = 7
     sphere.material = Stash.materials.get("woodMaterial")
 
-    Stash.box = BABYLON.MeshBuilder.CreateBox("box", {height: 1, width: 16, depth: 16}, Stash.scene)
+    Stash.box = BABYLON.MeshBuilder.CreateBox("box", {height: 1, width: Stash.TILE_SIZE, depth: Stash.TILE_SIZE}, Stash.scene)
     Stash.box.material = Stash.materials.get("soilMaterial")
     Stash.box.position.y = 2
     Stash.box.visibility = 0
@@ -189,8 +200,9 @@ function createTileByClone(t) {
 function updateTileToTileObject(tTile, tObject) {
     tTile.material = Stash.materials.get("soilMaterial")
     tTile.position.y = 2
-    tTile.position.x = tObject.X * 16
-    tTile.position.z = tObject.Y * 16
+
+    tTile.position.x = (tObject.X + Stash.mapOffsetX) * Stash.TILE_SIZE
+    tTile.position.z = (tObject.Y + Stash.mapOffsetY) * Stash.TILE_SIZE
     tTile.tag = tObject
     tTile.visibility = 1
 
@@ -214,6 +226,13 @@ function GarbageCollectTiles(minX, maxX, minY, maxY) {
         Stash.mapTilesBin.set(id, tile)
     }
 
+}
+
+function alignMap() {
+    for (let tTile of Stash.mapTiles) {
+        tTile.position.x = (tTile.tag.X + Stash.mapOffsetX) * Stash.TILE_SIZE
+        tTile.position.y = (tTile.tag.Y + Stash.mapOffsetY) * Stash.TILE_SIZE
+    }
 }
 
 
