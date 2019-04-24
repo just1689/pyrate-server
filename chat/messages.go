@@ -17,3 +17,10 @@ type MapRequestBody struct {
 	X int `json:"X"`
 	Y int `json:"Y"`
 }
+
+type KeyboardBody struct {
+	W int `json:"W"`
+	A int `json:"A"`
+	S int `json:"S"`
+	D int `json:"D"`
+}
