@@ -23,7 +23,6 @@ class Stash {
     static mapOffsetY = 0
 
 
-
 }
 
 function StartBabylonEngine() {
@@ -144,7 +143,11 @@ function playground() {
     sphere.position.y = 7
     sphere.material = Stash.materials.get("woodMaterial")
 
-    Stash.box = BABYLON.MeshBuilder.CreateBox("box", {height: 1, width: Stash.TILE_SIZE, depth: Stash.TILE_SIZE}, Stash.scene)
+    Stash.box = BABYLON.MeshBuilder.CreateBox("box", {
+        height: 1,
+        width: Stash.TILE_SIZE,
+        depth: Stash.TILE_SIZE
+    }, Stash.scene)
     Stash.box.material = Stash.materials.get("soilMaterial")
     Stash.box.position.y = 2
     Stash.box.visibility = 0
@@ -188,12 +191,12 @@ function handleTile(tObject) {
 
 }
 
-function createTileByClone(t) {
+function createTileByClone(tObject) {
 
-    let box = Stash.box.clone("box" + Stash.mapTilesCounter++)
-    box.material = Stash.materials.get("soilMaterial")
-    updateTileToTileObject(box, t)
-    Stash.mapTiles.set(t.ID, box)
+    let tTile = Stash.box.clone("box" + Stash.mapTilesCounter++)
+    tTile.material = Stash.materials.get("soilMaterial")
+    updateTileToTileObject(tTile, tObject)
+    Stash.mapTiles.set(tObject.ID, tTile)
 
 }
 
@@ -213,17 +216,17 @@ function updateTileToTileObject(tTile, tObject) {
 function GarbageCollectTiles(minX, maxX, minY, maxY) {
     let marked = []
     for (let pair of Stash.mapTiles) {
-        let t = pair[1].tag
-        if (t.X >= minX && t.X <= maxX && t.Y >= minY && t.Y <= maxY) {
-            marked.push(t.ID)
+        let tObject = pair[1].tag
+        if (tObject.X >= minX && tObject.X <= maxX && tObject.Y >= minY && tObject.Y <= maxY) {
+            marked.push(tObject.ID)
         }
     }
 
     for (let id of marked) {
-        let tile = Stash.mapTiles.get(id)
+        let tTile = Stash.mapTiles.get(id)
         Stash.mapTiles.delete(id)
-        tile.visibility = 0
-        Stash.mapTilesBin.set(id, tile)
+        tTile.visibility = 0
+        Stash.mapTilesBin.set(id, tTile)
     }
 
 }
