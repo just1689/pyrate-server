@@ -22,6 +22,9 @@ class Stash {
     static mapOffsetX = 0
     static mapOffsetY = 0
 
+    //JUNK
+    static sphereMesh
+
 
 }
 
@@ -139,9 +142,9 @@ function createWater() {
 
 
 function playground() {
-    const sphere = BABYLON.Mesh.CreateSphere("sphere", Stash.TILE_SIZE, 10, Stash.scene)
-    sphere.position.y = 7
-    sphere.material = Stash.materials.get("woodMaterial")
+    Stash.sphereMesh = BABYLON.Mesh.CreateSphere("sphere", Stash.TILE_SIZE, 10, Stash.scene)
+    Stash.sphereMesh.position.y = 7
+    Stash.sphereMesh.material = Stash.materials.get("woodMaterial")
 
     Stash.tileMesh = BABYLON.MeshBuilder.CreateBox("box", {
         height: 1,
@@ -152,7 +155,7 @@ function playground() {
     Stash.tileMesh.position.y = 2
     Stash.tileMesh.visibility = 0
 
-    Stash.materials.get("waterMaterial").addToRenderList(sphere)
+    Stash.materials.get("waterMaterial").addToRenderList(Stash.sphereMesh)
     Stash.materials.get("waterMaterial").addToRenderList(Stash.tileMesh)
 }
 
@@ -232,9 +235,10 @@ function GarbageCollectTiles(minX, maxX, minY, maxY) {
 }
 
 function alignMap() {
-    for (let tileMesh of Stash.mapTiles) {
+    for (let mapRow of Stash.mapTiles) {
+        let tileMesh = mapRow[1]
         tileMesh.position.x = (tileMesh.tag.X + Stash.mapOffsetX) * Stash.TILE_SIZE
-        tileMesh.position.y = (tileMesh.tag.Y + Stash.mapOffsetY) * Stash.TILE_SIZE
+        tileMesh.position.z = (tileMesh.tag.Y + Stash.mapOffsetY) * Stash.TILE_SIZE
     }
 }
 
