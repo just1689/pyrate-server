@@ -25,6 +25,14 @@ class Stash {
     //JUNK
     static sphereMesh
 
+    static keyboard = {
+        A: false,
+        S: false,
+        D: false,
+        W: false,
+
+    }
+
 
 }
 
@@ -51,6 +59,9 @@ function StartBabylonEngine() {
     window.addEventListener("resize", () => {
         Stash.engine.resize()
     })
+
+    window.addEventListener("keyup", keyUp);
+    window.addEventListener("keydown", keyDown);
 
 }
 
@@ -273,4 +284,51 @@ function requestMap() {
     }
     let msg = JSON.stringify(o)
     sendWs(msg)
+}
+
+function keyDown(e) {
+    if (changeKeyboard(e, true)) {
+        sendKeyboardState()
+    }
+}
+
+function keyUp(e) {
+    if (changeKeyboard(e, false)) {
+        sendKeyboardState()
+    }
+
+}
+
+function changeKeyboard(e, changeTo) {
+    if (e.key === "A" || e.key === "a") {
+        if (Stash.keyboard.A !== changeTo) {
+            Stash.keyboard.A = changeTo
+            return true
+        }
+    } else if (e.key === "S" || e.key === "s") {
+        if (Stash.keyboard.S !== changeTo) {
+            Stash.keyboard.S = changeTo
+            return true
+        }
+    } else if (e.key === "D" || e.key === "d") {
+        if (Stash.keyboard.D !== changeTo) {
+            Stash.keyboard.D = changeTo
+            return true
+        }
+    } else if (e.key === "W" || e.key === "w") {
+        if (Stash.keyboard.W !== changeTo) {
+            Stash.keyboard.W = changeTo
+            return true
+        }
+    }
+
+    return false
+}
+
+function sendKeyboardState() {
+    let msg = {
+        topic: "keyboard",
+        body: Stash.keyboard,
+    }
+    sendWs(JSON.stringify(msg))
 }
