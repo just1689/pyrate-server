@@ -14,7 +14,7 @@ class Stash {
     static light
     static water
 
-    static box
+    static tileMesh
     static mapTiles = new Map()
     static mapTilesCounter = 0
     static mapTilesBin = new Map()
@@ -143,17 +143,17 @@ function playground() {
     sphere.position.y = 7
     sphere.material = Stash.materials.get("woodMaterial")
 
-    Stash.box = BABYLON.MeshBuilder.CreateBox("box", {
+    Stash.tileMesh = BABYLON.MeshBuilder.CreateBox("box", {
         height: 1,
         width: Stash.TILE_SIZE,
         depth: Stash.TILE_SIZE
     }, Stash.scene)
-    Stash.box.material = Stash.materials.get("soilMaterial")
-    Stash.box.position.y = 2
-    Stash.box.visibility = 0
+    Stash.tileMesh.material = Stash.materials.get("soilMaterial")
+    Stash.tileMesh.position.y = 2
+    Stash.tileMesh.visibility = 0
 
     Stash.materials.get("waterMaterial").addToRenderList(sphere)
-    Stash.materials.get("waterMaterial").addToRenderList(Stash.box)
+    Stash.materials.get("waterMaterial").addToRenderList(Stash.tileMesh)
 }
 
 
@@ -178,36 +178,36 @@ function handleTile(tObject) {
         return
     }
 
-    let tTile
+    let tileMesh
     for (let pair of Stash.mapTilesBin) {
-        tTile = pair[1]
+        tileMesh = pair[1]
         break
     }
 
-    Stash.mapTilesBin.delete(tTile.tag.ID)
-    Stash.mapTiles.set(tObject.ID, tTile)
-    updateTileToTileObject(tTile, tObject)
+    Stash.mapTilesBin.delete(tileMesh.tag.ID)
+    Stash.mapTiles.set(tObject.ID, tileMesh)
+    updateTileToTileObject(tileMesh, tObject)
 
 
 }
 
 function createTileByClone(tObject) {
 
-    let tTile = Stash.box.clone("box" + Stash.mapTilesCounter++)
-    tTile.material = Stash.materials.get("soilMaterial")
-    updateTileToTileObject(tTile, tObject)
-    Stash.mapTiles.set(tObject.ID, tTile)
+    let tileMesh = Stash.tileMesh.clone("box" + Stash.mapTilesCounter++)
+    tileMesh.material = Stash.materials.get("soilMaterial")
+    updateTileToTileObject(tileMesh, tObject)
+    Stash.mapTiles.set(tObject.ID, tileMesh)
 
 }
 
-function updateTileToTileObject(tTile, tObject) {
-    tTile.material = Stash.materials.get("soilMaterial")
-    tTile.position.y = 2
+function updateTileToTileObject(tileMesh, tObject) {
+    tileMesh.material = Stash.materials.get("soilMaterial")
+    tileMesh.position.y = 2
 
-    tTile.position.x = (tObject.X + Stash.mapOffsetX) * Stash.TILE_SIZE
-    tTile.position.z = (tObject.Y + Stash.mapOffsetY) * Stash.TILE_SIZE
-    tTile.tag = tObject
-    tTile.visibility = 1
+    tileMesh.position.x = (tObject.X + Stash.mapOffsetX) * Stash.TILE_SIZE
+    tileMesh.position.z = (tObject.Y + Stash.mapOffsetY) * Stash.TILE_SIZE
+    tileMesh.tag = tObject
+    tileMesh.visibility = 1
 
 }
 
@@ -223,18 +223,18 @@ function GarbageCollectTiles(minX, maxX, minY, maxY) {
     }
 
     for (let id of marked) {
-        let tTile = Stash.mapTiles.get(id)
+        let tileMesh = Stash.mapTiles.get(id)
         Stash.mapTiles.delete(id)
-        tTile.visibility = 0
-        Stash.mapTilesBin.set(id, tTile)
+        tileMesh.visibility = 0
+        Stash.mapTilesBin.set(id, tileMesh)
     }
 
 }
 
 function alignMap() {
-    for (let tTile of Stash.mapTiles) {
-        tTile.position.x = (tTile.tag.X + Stash.mapOffsetX) * Stash.TILE_SIZE
-        tTile.position.y = (tTile.tag.Y + Stash.mapOffsetY) * Stash.TILE_SIZE
+    for (let tileMesh of Stash.mapTiles) {
+        tileMesh.position.x = (tileMesh.tag.X + Stash.mapOffsetX) * Stash.TILE_SIZE
+        tileMesh.position.y = (tileMesh.tag.Y + Stash.mapOffsetY) * Stash.TILE_SIZE
     }
 }
 
