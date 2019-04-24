@@ -2,10 +2,6 @@ package chat
 
 import (
 	"bytes"
-	"encoding/json"
-	"fmt"
-	"github.com/just1689/pyrate-server/db"
-	"github.com/just1689/pyrate-server/model"
 	"log"
 	"net/http"
 	"time"
@@ -39,8 +35,10 @@ type Client struct {
 	Authenticated bool
 	hub           *Hub
 	conn          *websocket.Conn
-	send          chan []byte
+	SendToWS      chan []byte
 	StopNSQ       chan bool
+	StopPlayer    chan bool
+	SendToPlayer  chan []byte
 }
 
 func (c *Client) Auth() bool {
@@ -51,6 +49,7 @@ func (c *Client) Auth() bool {
 
 func (c *Client) close() {
 	c.StopNSQ <- true
+	c.StopPlayer <- true
 
 }
 
@@ -79,7 +78,7 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		messageHandler(c, message)
+		c.Player.HandleMessage(message)
 	}
 }
 
@@ -91,7 +90,7 @@ func (c *Client) writePump() {
 	}()
 	for {
 		select {
-		case message, ok := <-c.send:
+		case message, ok := <-c.sendToWS:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
@@ -117,19 +116,23 @@ func (c *Client) writePump() {
 	}
 }
 
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request, name string, secret string, subscriber func(topic, channel string) chan bool) {
+func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request, name string, secret string, subscriber func(topic, channel string) chan bool, PlayerCreator func(c *Client)) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	client := &Client{
-		hub:    hub,
-		conn:   conn,
-		send:   make(chan []byte, 256),
-		id:     name,
-		secret: secret,
+		hub:          hub,
+		conn:         conn,
+		SendToWS:     make(chan []byte, 256),
+		id:           name,
+		secret:       secret,
+		StopPlayer:   make(chan bool),
+		SendToPlayer: make(chan []byte, 256),
 	}
+	PlayerCreator(client)
+
 	client.Auth()
 	client.hub.register <- client
 
@@ -138,62 +141,6 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request, name string, secr
 
 	if client.Authenticated {
 		//client.StopNSQ = subscriber(fmt.Sprint("player."+client.id), "all")
-	}
-
-}
-
-func messageHandler(client *Client, b []byte) {
-	m, err := bytesToMessage(b)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	//THIS NEEDS TO MOVE OUTSIDE OF package chat
-
-	if m.Topic == "map-request" {
-
-		body := MapRequestBody{}
-		err := json.Unmarshal(m.Body, &body)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		conn, err := db.Connect()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		c := model.GetTilesChunkAsync(conn, body.X-100, body.X+100, body.Y-100, body.Y+100)
-		count := 0
-		for tile := range c {
-			if tile.TileType == model.TileTypeWater {
-				continue
-			}
-			b, err := json.Marshal(*tile)
-			m := Message{
-				Topic: "tile",
-				Body:  b,
-			}
-			mb, err := json.Marshal(m)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			client.send <- mb
-			count++
-		}
-		fmt.Println("Sent", count, "tiles")
-
-	} else if m.Topic == "keyboard" {
-		keyboard := KeyboardBody{}
-		err := json.Unmarshal(m.Body, &keyboard)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
 	}
 
 }

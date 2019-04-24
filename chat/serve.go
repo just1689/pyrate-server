@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func Serve(router *mux.Router, subscriber func(topic, channel string) chan bool) {
+func Serve(router *mux.Router, subscriber func(topic, channel string) chan bool, playerCreator func(c *Client)) {
 	flag.Parse()
 	hub := newHub()
 	go hub.run()
@@ -17,7 +17,7 @@ func Serve(router *mux.Router, subscriber func(topic, channel string) chan bool)
 		name := params["name"]
 		secret := params["secret"]
 		fmt.Println("Connected", name, secret)
-		serveWs(hub, w, r, name, secret, subscriber)
+		serveWs(hub, w, r, name, secret, subscriber, playerCreator)
 	}).Methods("GET")
 
 }

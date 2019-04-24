@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/just1689/pyrate-server/chat"
+	"github.com/just1689/pyrate-server/model"
 	"github.com/just1689/pyrate-server/queues"
 	"io/ioutil"
 	"log"
@@ -21,7 +22,7 @@ func main() {
 
 	fmt.Println("Starting Pirate Server on", *addr)
 	router := mux.NewRouter()
-	chat.Serve(router, Subscriber)
+	chat.Serve(router, Subscriber, playerCreator)
 	router.HandleFunc("/", handleHome)
 	setupStaticHost(router)
 
@@ -61,4 +62,8 @@ func Subscriber(topic, channel string) (stopper chan bool) {
 		queues.Subscribe(config)
 	}()
 	return
+}
+
+func playerCreator(client *chat.Client) {
+	model.CreatePlayerAndStart(client.SendToPlayer, client.SendToWS)
 }
