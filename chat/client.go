@@ -149,6 +149,8 @@ func messageHandler(client *Client, b []byte) {
 		return
 	}
 
+	//THIS NEEDS TO MOVE OUTSIDE OF package chat
+
 	if m.Topic == "map-request" {
 
 		body := MapRequestBody{}
