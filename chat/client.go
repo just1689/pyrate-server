@@ -186,6 +186,14 @@ func messageHandler(client *Client, b []byte) {
 		}
 		fmt.Println("Sent", count, "tiles")
 
+	} else if m.Topic == "keyboard" {
+		keyboard := KeyboardBody{}
+		err := json.Unmarshal(m.Body, &keyboard)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
 	}
 
 }
