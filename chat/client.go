@@ -78,7 +78,7 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.Player.HandleMessage(message)
+		c.SendToPlayer <- message
 	}
 }
 
@@ -90,7 +90,7 @@ func (c *Client) writePump() {
 	}()
 	for {
 		select {
-		case message, ok := <-c.sendToWS:
+		case message, ok := <-c.SendToWS:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.

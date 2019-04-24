@@ -1,4 +1,4 @@
-package chat
+package model
 
 import "encoding/json"
 
@@ -19,8 +19,13 @@ type MapRequestBody struct {
 }
 
 type KeyboardBody struct {
-	W int `json:"W"`
-	A int `json:"A"`
-	S int `json:"S"`
-	D int `json:"D"`
+	W bool `json:"W"`
+	A bool `json:"A"`
+	S bool `json:"S"`
+	D bool `json:"D"`
+}
+
+type MessageOffset struct {
+	X float32 `json:"X"`
+	Y float32 `json:"Y"`
 }
