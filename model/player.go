@@ -130,16 +130,16 @@ func (player Player) handleKeyboardRequest(messages json.RawMessage) {
 
 func (player Player) move() {
 	if player.Keyboard.A {
-		player.Offset.X -= 0.2
-	}
-	if player.Keyboard.D {
 		player.Offset.X += 0.2
 	}
+	if player.Keyboard.D {
+		player.Offset.X -= 0.2
+	}
 	if player.Keyboard.W {
-		player.Offset.Y += 0.2
+		player.Offset.Y -= 0.2
 	}
 	if player.Keyboard.S {
-		player.Offset.Y -= 0.2
+		player.Offset.Y += 0.2
 	}
 }
 
