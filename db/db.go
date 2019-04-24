@@ -6,9 +6,8 @@ import (
 	"os"
 )
 
-var DatabaseHost = "192.168.88.26"
-
-//var DatabaseHost = "localhost"
+//var DatabaseHost = "192.168.88.26"
+var DatabaseHost = "localhost"
 var DatabaseUser = "postgres"
 var DatabasePassword = "toor"
 var DatabaseDatabase = "pirates"
