@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/just1689/pyrate-server/db"
+	"github.com/just1689/pyrate-server/queues"
 	"sync"
 	"time"
 )
@@ -19,7 +20,8 @@ type Player struct {
 	Offset    MessageOffset
 	wgPhysics sync.WaitGroup
 
-	lastOffset MessageOffset
+	lastOffset    MessageOffset
+	NATSPublisher func(subject string, msg []byte) error
 }
 
 func CreatePlayerAndStart(incoming, outgoing chan []byte) *Player {
@@ -38,6 +40,12 @@ func CreatePlayerAndStart(incoming, outgoing chan []byte) *Player {
 			Y: 0,
 		},
 		Keyboard: &KeyboardBody{},
+	}
+
+	var err error
+	player.NATSPublisher, err = queues.GetNATSPublisher()
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	player.wgPhysics.Add(1)
