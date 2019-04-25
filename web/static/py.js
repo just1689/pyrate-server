@@ -254,11 +254,19 @@ function alignMap() {
 }
 
 
+function handleOffset(body) {
+    Stash.mapOffsetX = body.X
+    Stash.mapOffsetY = body.Y
+    alignMap()
+}
+
 function wsOnMessage(evt) {
     const o = JSON.parse(evt.data)
     if (o.topic === "tile") {
         handleTile(o.body)
         return
+    } else if (o.topic == "offset") {
+        handleOffset(o.body)
     }
 
     console.log("ws> " + evt.data)
