@@ -14,6 +14,9 @@ const SingleIsland ChunkType = "SingleIsland"
 const TwoIslands ChunkType = "TwoIslands"
 const SmallIslands ChunkType = "SmallIslands"
 
+const ChunkSize = 50
+const MapWidth = 1000
+
 type Chunk []*Tile
 
 func (c Chunk) GetXMin() (r int) {
@@ -183,5 +186,18 @@ func (c Chunk) RandXAndY(rnd *rand.Rand) (randX, randY int) {
 	randX = c.GetXMid() + rnd.Intn(10) - 5
 	randY = c.GetYMid() + rnd.Intn(10) - 5
 	return
+
+}
+
+func GetChunkNumber(x, y int) int {
+	result := 0
+
+	//Work out xdiff
+	result += x / ChunkSize
+
+	//Work out ydiff
+	result += y / MapWidth
+
+	return result
 
 }
