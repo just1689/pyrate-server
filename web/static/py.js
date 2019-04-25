@@ -265,7 +265,7 @@ function wsOnMessage(evt) {
     if (o.topic === "tile") {
         handleTile(o.body)
         return
-    } else if (o.topic == "offset") {
+    } else if (o.topic === "offset") {
         handleOffset(o.body)
     }
 
