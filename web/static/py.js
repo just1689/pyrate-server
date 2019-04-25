@@ -274,6 +274,10 @@ function wsOnMessage(evt) {
 
 function wsOnClose() {
     console.log("Socket closed...")
+
+    console.log("> Removing tiles")
+    GarbageCollectTiles(0, 1000, 0, 1000)
+
     setTimeout(ConnectWS, 2000)
 }
 
