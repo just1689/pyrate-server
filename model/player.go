@@ -34,16 +34,16 @@ func CreatePlayerAndStart(incoming, outgoing chan []byte) *Player {
 		Stop:     make(chan bool), //??? to handle
 		Offset: MessageOffset{
 			X: -500,
-			Y: -500,
+			Z: -500,
 		},
 		lastOffset: MessageOffset{
 			X: 0,
-			Y: 0,
+			Z: 0,
 		},
 		Keyboard: &KeyboardBody{},
 	}
 	player.MidX = math.Ilogb(math.Abs(player.Offset.X))
-	player.MidZ = math.Ilogb(math.Abs(player.Offset.Y)) //TODO: no nonsense
+	player.MidZ = math.Ilogb(math.Abs(player.Offset.Z)) //TODO: no nonsense
 
 	var err error
 	player.NATSPublisher, err = queues.GetNATSPublisher()
@@ -119,13 +119,14 @@ func (player *Player) handleMapRequest(rawBody json.RawMessage) {
 		fmt.Println(err)
 		return
 	}
+	body.MakeAbs()
 
 	conn, err := db.Connect()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	c := GetTilesChunkAsync(conn, body.X-100, body.X+100, body.Y-100, body.Y+100)
+	c := GetTilesChunkAsync(conn, body.X-100, body.X+100, body.Z-100, body.Z+100)
 	count := 0
 	for tile := range c {
 		if tile.TileType == TileTypeWater {
@@ -167,10 +168,10 @@ func (player *Player) move() {
 		player.Offset.X -= 0.1
 	}
 	if player.Keyboard.W {
-		player.Offset.Y -= 0.1
+		player.Offset.Z -= 0.1
 	}
 	if player.Keyboard.S {
-		player.Offset.Y += 0.1
+		player.Offset.Z += 0.1
 	}
 }
 
@@ -178,7 +179,7 @@ func (player *Player) sendOffset() {
 	if !player.Offset.equals(player.lastOffset) {
 
 		player.lastOffset.X = player.Offset.X
-		player.lastOffset.Y = player.Offset.Y
+		player.lastOffset.Z = player.Offset.Z
 
 		bo, err := json.Marshal(player.Offset)
 		if err != nil {
@@ -210,7 +211,7 @@ func (player *Player) checkForMapDiff() bool {
 		return true
 	}
 
-	tY := math.Ilogb(math.Abs(player.Offset.Y))
+	tY := math.Ilogb(math.Abs(player.Offset.Z))
 	if tY-player.MidZ > GlobalMaxPhysyicalDiff {
 		player.MidX = tX
 		return true

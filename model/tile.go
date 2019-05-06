@@ -52,7 +52,8 @@ func GetTilesChunkAsync(conn *pgx.Conn, x1, x2, z1, z2 int) (c chan *Tile) {
 	c = make(chan *Tile, 1024)
 	go func() {
 		count := 0
-		rows, _ := conn.Query("select * from world.tiles where x>=$1 and x<=$2 and y>=$3 and y<=$4", x1, x2, z1, z2)
+		fmt.Println("select * from world.tiles where x>=$1 and x<=$2 and z>=$3 and z<=$4", x1, x2, z1, z2)
+		rows, _ := conn.Query("select * from world.tiles where x>=$1 and x<=$2 and z>=$3 and z<=$4", x1, x2, z1, z2)
 		for rows.Next() {
 			tile := &Tile{}
 			err := rows.Scan(&tile.ID, &tile.X, &tile.Z, &tile.TileType, &tile.TileSkin)

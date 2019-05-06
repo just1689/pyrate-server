@@ -19,8 +19,8 @@ class Stash {
     static mapTilesCounter = 0
     static mapTilesBin = new Map()
 
-    static mapOffsetX = 0
-    static mapOffsetZ = 0
+    static mapOffsetX = -500
+    static mapOffsetZ = -500
 
     //JUNK
     static sphereMesh
@@ -172,7 +172,12 @@ function playground() {
 
 
 function ConnectWS() {
-    Stash.ws = new WebSocket("ws://localhost:8000/ws/test/er");
+    let url = "ws://" +
+        window.location.hostname +
+        ":" +
+        window.location.port +
+        "/ws/test/er"
+    Stash.ws = new WebSocket(url);
     Stash.ws.onopen = wsOnOpen
     Stash.ws.onmessage = wsOnMessage
     Stash.ws.onclose = wsOnClose
@@ -218,6 +223,7 @@ function updateTileToTileObject(tileMesh, tObject) {
     tileMesh.material = Stash.materials.get("soilMaterial")
     tileMesh.position.y = 2
 
+
     tileMesh.position.x = (tObject.X + Stash.mapOffsetX) * Stash.TILE_SIZE
     tileMesh.position.z = (tObject.Z + Stash.mapOffsetZ) * Stash.TILE_SIZE
     tileMesh.tag = tObject
@@ -227,11 +233,11 @@ function updateTileToTileObject(tileMesh, tObject) {
 
 
 //Removes tiles from view (render) if they are within an area
-function GarbageCollectTiles(minX, maxX, minY, maxY) {
+function GarbageCollectTiles(minX, maxX, minZ, maxZ) {
     let marked = []
     for (let pair of Stash.mapTiles) {
         let tObject = pair[1].tag
-        if (tObject.X >= minX && tObject.X <= maxX && tObject.Z >= minY && tObject.Z <= maxY) {
+        if (tObject.X >= minX && tObject.X <= maxX && tObject.Z >= minZ && tObject.Z <= maxZ) {
             marked.push(tObject.ID)
         }
     }
@@ -290,8 +296,8 @@ function requestMap() {
     let o = {
         topic: "map-request",
         body: {
-            X: 0,
-            Y: 0,
+            X: Stash.mapOffsetX,
+            Z: Stash.mapOffsetZ,
         }
     }
     let msg = JSON.stringify(o)
