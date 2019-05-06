@@ -50,8 +50,8 @@ func (c Chunk) GetXMid() (r int) {
 func (c Chunk) GetYMin() (r int) {
 	r = 99999999
 	for _, t := range c {
-		if t.Y < r {
-			r = t.Y
+		if t.Z < r {
+			r = t.Z
 		}
 	}
 	return
@@ -62,8 +62,8 @@ func (c Chunk) GetYMax() (r int) {
 	//Possibly the least efficient impl possible
 	r = 0
 	for _, t := range c {
-		if t.Y > r {
-			r = t.Y
+		if t.Z > r {
+			r = t.Z
 		}
 	}
 	return
@@ -163,7 +163,7 @@ func (c Chunk) FindFirstWater(x, y int, r *rand.Rand) (ok bool, t *Tile) {
 func (c Chunk) GetAt(x, y int) (found bool, tile *Tile) {
 	for _, tile = range c {
 		//fmt.Println(x, tile.X, y, tile.Y)
-		if tile.X == x && tile.Y == y {
+		if tile.X == x && tile.Z == y {
 			found = true
 			return
 		}
@@ -176,7 +176,7 @@ func (c Chunk) GetAsInterfaceSlSl() (result [][]interface{}) {
 	result = make([][]interface{}, 0)
 	for _, tile := range c {
 		row := make([]interface{}, 0)
-		row = append(row, tile.ID, tile.X, tile.Y, tile.TileType, tile.TileSkin)
+		row = append(row, tile.ID, tile.X, tile.Z, tile.TileType, tile.TileSkin)
 		result = append(result, row)
 	}
 	return
