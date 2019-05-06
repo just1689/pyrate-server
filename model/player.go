@@ -5,13 +5,16 @@ import (
 	"fmt"
 	"github.com/just1689/pyrate-server/db"
 	"github.com/just1689/pyrate-server/queues"
+	"math"
 	"sync"
 	"time"
 )
 
+const GlobalMaxPhysyicalDiff = 100
+
 type Player struct {
-	X         int
-	Z         int
+	MidX      int
+	MidZ      int
 	Incoming  chan []byte
 	Outgoing  chan []byte
 	Stop      chan bool
@@ -26,14 +29,12 @@ type Player struct {
 
 func CreatePlayerAndStart(incoming, outgoing chan []byte) *Player {
 	player := Player{
-		X:        50,
-		Z:        50,
 		Incoming: incoming,
 		Outgoing: outgoing,
 		Stop:     make(chan bool), //??? to handle
 		Offset: MessageOffset{
-			X: -25,
-			Y: -25,
+			X: -500,
+			Y: -500,
 		},
 		lastOffset: MessageOffset{
 			X: 0,
@@ -41,6 +42,8 @@ func CreatePlayerAndStart(incoming, outgoing chan []byte) *Player {
 		},
 		Keyboard: &KeyboardBody{},
 	}
+	player.MidX = math.Ilogb(math.Abs(player.Offset.X))
+	player.MidZ = math.Ilogb(math.Abs(player.Offset.Y)) //TODO: no nonsense
 
 	var err error
 	player.NATSPublisher, err = queues.GetNATSPublisher()
@@ -79,6 +82,13 @@ func (player *Player) start() {
 				player.move()
 
 			}
+		}
+	}()
+
+	go func() {
+		for {
+			time.Sleep(1 * time.Second)
+			player.checkForMapDiff()
 		}
 	}()
 
@@ -189,5 +199,23 @@ func (player *Player) sendOffset() {
 		player.Outgoing <- b
 
 	}
+
+}
+
+func (player *Player) checkForMapDiff() bool {
+
+	tX := math.Ilogb(math.Abs(player.Offset.X))
+	if tX-player.MidX > GlobalMaxPhysyicalDiff {
+		player.MidX = tX
+		return true
+	}
+
+	tY := math.Ilogb(math.Abs(player.Offset.Y))
+	if tY-player.MidZ > GlobalMaxPhysyicalDiff {
+		player.MidX = tX
+		return true
+	}
+
+	return false
 
 }
