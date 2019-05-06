@@ -2,6 +2,8 @@ package model
 
 import (
 	"fmt"
+	"github.com/jackc/pgx"
+	"github.com/sirupsen/logrus"
 	"log"
 	"math/rand"
 	"time"
@@ -35,13 +37,13 @@ func GenerateWaterChunks(x1, x2, z1, z2, chunkSide int) (c chan Chunk) {
 func GenerateWaterChunk(x1, x2, z1, z2 int) (c Chunk) {
 	for x := x1; x <= x2; x++ {
 		for z := z1; z <= z2; z++ {
-			t := Tile{
+			c = append(c, &Tile{
+				ID:       fmt.Sprint(x, ".", z),
 				X:        x,
 				Z:        z,
 				TileType: TileTypeWater,
 				TileSkin: "",
-			}
-			c = append(c, &t)
+			})
 		}
 	}
 	return
@@ -239,4 +241,26 @@ func GetChunkNumber(x, y int) int {
 
 	return result
 
+}
+
+func (cp *Chunk) InsertUsingCopy(conn *pgx.Conn) (copyCount int) {
+	var chunk Chunk
+	chunk = *cp
+	l := len(chunk)
+	if l == 0 {
+		return
+	}
+	rows := chunk.ToInterface()
+	copyCount, err := conn.CopyFrom(
+		pgx.Identifier{"world", "tiles"},
+		TileSqlCols,
+		pgx.CopyFromRows(rows),
+	)
+	if err != nil {
+		logrus.Fatalln(err)
+	}
+	if l != copyCount {
+		logrus.Fatalln(l, " is not equal to ", copyCount)
+	}
+	return
 }

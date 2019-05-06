@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"github.com/jackc/pgx"
 	"github.com/just1689/pyrate-server/db"
 	"github.com/just1689/pyrate-server/maps"
 	"github.com/just1689/pyrate-server/model"
@@ -12,16 +10,15 @@ import (
 	"time"
 )
 
-const workers = 32
-const writers = 4
+const workers = 64
 
 var ops uint64
 var rowsWritten uint64
 
 var wStop []chan bool
 
-var mapWidth = 100
-var mapHeight = 100
+var mapWidth = 5000
+var mapHeight = 5000
 var chunkDiff = 50
 
 func main() {
@@ -29,9 +26,6 @@ func main() {
 
 	//Figure out when all work is done
 	var wg sync.WaitGroup
-
-	//Have a channel that can hold enough work for every worker to be io busy some where else - then its not the blocker
-	dbInChan := make(chan *model.Tile, chunkDiff*chunkDiff*writers)
 
 	c := model.GenerateWaterChunks(0, mapWidth, 0, mapHeight, chunkDiff)
 
@@ -41,20 +35,10 @@ func main() {
 		for i := 0; i < workers; i++ {
 
 			//Run worker in go routine
-			startWorker(fmt.Sprint(i), c, &wg, dbInChan)
+			startWorker(c, &wg)
 
 			//Give the DB some breathing room
 			time.Sleep(10 * time.Millisecond)
-		}
-		wg.Done()
-	}()
-
-	go func() {
-		wg.Add(1)
-		for i := 0; i < writers; i++ {
-			s := make(chan bool)
-			wStop = append(wStop, s)
-			buildWriter(s, chunkDiff*chunkDiff, dbInChan)
 		}
 		wg.Done()
 	}()
@@ -71,8 +55,12 @@ func main() {
 
 }
 
-func startWorker(name string, in chan model.Chunk, wg *sync.WaitGroup, dbChan chan *model.Tile) {
+func startWorker(in chan model.Chunk, wg *sync.WaitGroup) {
 	wg.Add(1)
+	conn, err := db.Connect()
+	if err != nil {
+		logrus.Fatalln(err)
+	}
 	go func() {
 		for chunk := range in {
 			wg.Add(1)
@@ -80,61 +68,13 @@ func startWorker(name string, in chan model.Chunk, wg *sync.WaitGroup, dbChan ch
 			start := time.Now()
 			ct := maps.RandomizeChunckType()
 			maps.GenerateChunk(chunk, ct)
-			for _, tile := range chunk {
-				dbChan <- tile
-			}
-			logrus.Infoln("Chunk", chunkID, "took", time.Since(start), "(", ct, ")")
+			chunk.InsertUsingCopy(conn)
+			logrus.Infoln("Inserted chunk", chunkID, "took", time.Since(start), "(", ct, ")")
 			wg.Done()
+			atomic.AddUint64(&rowsWritten, uint64(len(chunk)))
 		}
+		conn.Close()
 		wg.Done()
 	}()
-
-}
-
-func buildWriter(stop chan bool, max int, in chan *model.Tile) {
-	conn, err := db.Connect()
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	go func() {
-		var cache model.Chunk
-		for {
-			select {
-			case <-stop:
-				copyToDB(conn, cache)
-				conn.Close()
-				return
-			case t := <-in:
-				cache = append(cache, t)
-				if cache.Size() >= max {
-					copyToDB(conn, cache)
-					cache = model.Chunk{}
-				}
-			}
-		}
-	}()
-	return
-}
-
-func copyToDB(conn *pgx.Conn, chunk model.Chunk) {
-	l := len(chunk)
-	if l == 0 {
-		return
-	}
-
-	rows := chunk.ToInterface()
-	copyCount, err := conn.CopyFrom(
-		pgx.Identifier{"world", "tiles"},
-		model.TileSqlCols,
-		pgx.CopyFromRows(rows),
-	)
-	logrus.Infoln("Wrote", l, "rows")
-	atomic.AddUint64(&rowsWritten, uint64(l))
-	if err != nil {
-		logrus.Fatalln(err)
-	}
-	if l != copyCount {
-		logrus.Fatalln(l, " is not equal to ", copyCount)
-	}
 
 }
