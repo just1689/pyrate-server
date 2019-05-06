@@ -75,6 +75,7 @@ func startWorker(name string, in chan model.Chunk, wg *sync.WaitGroup, dbChan ch
 	wg.Add(1)
 	go func() {
 		for chunk := range in {
+			wg.Add(1)
 			chunkID := atomic.AddUint64(&ops, 1)
 			start := time.Now()
 			ct := maps.RandomizeChunckType()
@@ -83,6 +84,7 @@ func startWorker(name string, in chan model.Chunk, wg *sync.WaitGroup, dbChan ch
 				dbChan <- tile
 			}
 			logrus.Infoln("Chunk", chunkID, "took", time.Since(start), "(", ct, ")")
+			wg.Done()
 		}
 		wg.Done()
 	}()
@@ -117,12 +119,6 @@ func buildWriter(stop chan bool, max int, in chan *model.Tile) {
 func copyToDB(conn *pgx.Conn, chunk model.Chunk) {
 	l := len(chunk)
 	if l == 0 {
-		return
-	}
-
-	if true {
-		//logrus.Infoln("Wrote", len(chunk))
-		atomic.AddUint64(&rowsWritten, uint64(l))
 		return
 	}
 
