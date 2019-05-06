@@ -121,7 +121,7 @@ func copyToDB(conn *pgx.Conn, chunk model.Chunk) {
 	}
 
 	if true {
-		logrus.Infoln("Wrote", len(chunk))
+		//logrus.Infoln("Wrote", len(chunk))
 		atomic.AddUint64(&rowsWritten, uint64(l))
 		return
 	}

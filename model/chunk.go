@@ -22,8 +22,8 @@ type Chunk []*Tile
 func GenerateWaterChunks(x1, x2, z1, z2, chunkSide int) (c chan Chunk) {
 	c = make(chan Chunk, 2) // Cache up to N chunks
 	go func() {
-		for x := x1; x <= x2; x += chunkSide {
-			for z := z1; z <= z2; z += chunkSide {
+		for x := x1; x < x2; x += chunkSide {
+			for z := z1; z < z2; z += chunkSide {
 				c <- GenerateWaterChunk(x, x+chunkSide-1, z, z+chunkSide-1)
 			}
 		}
