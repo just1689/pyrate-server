@@ -19,6 +19,45 @@ const MapWidth = 1000
 
 type Chunk []*Tile
 
+func GenerateWaterChunks(x1, x2, z1, z2, chunkSide int) (c chan Chunk) {
+	c = make(chan Chunk, 2) // Cache up to N chunks
+	go func() {
+		for x := x1; x <= x2; x += chunkSide {
+			for z := z1; z <= z2; z += chunkSide {
+				c <- GenerateWaterChunk(x, x+chunkSide-1, z, z+chunkSide-1)
+			}
+		}
+		close(c)
+	}()
+	return
+}
+
+func GenerateWaterChunk(x1, x2, z1, z2 int) (c Chunk) {
+	for x := x1; x <= x2; x++ {
+		for z := z1; z <= z2; z++ {
+			t := Tile{
+				X:        x,
+				Z:        z,
+				TileType: TileTypeWater,
+				TileSkin: "",
+			}
+			c = append(c, &t)
+		}
+	}
+	return
+}
+
+func (c Chunk) ToInterface() (result [][]interface{}) {
+	for _, t := range c {
+		result = append(result, t.ToInterface())
+	}
+	return
+}
+
+func (c Chunk) Size() int {
+	return len(c)
+}
+
 func (c Chunk) GetXMin() (r int) {
 	r = 99999999
 	for _, t := range c {

@@ -2,100 +2,143 @@ package main
 
 import (
 	"fmt"
+	"github.com/jackc/pgx"
 	"github.com/just1689/pyrate-server/db"
 	"github.com/just1689/pyrate-server/maps"
 	"github.com/just1689/pyrate-server/model"
+	"github.com/sirupsen/logrus"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
 const workers = 32
+const writers = 4
+
+var ops uint64
+var rowsWritten uint64
+
+var wStop []chan bool
+
+var mapWidth = 100
+var mapHeight = 100
+var chunkDiff = 50
 
 func main() {
+	start := time.Now()
 
 	//Figure out when all work is done
 	var wg sync.WaitGroup
 
-	//Produces x1, x2, y1, y2 for each chunk to be generated
-	work := giveMeWork(&wg)
+	//Have a channel that can hold enough work for every worker to be io busy some where else - then its not the blocker
+	dbInChan := make(chan *model.Tile, chunkDiff*chunkDiff*writers)
+
+	c := model.GenerateWaterChunks(0, mapWidth, 0, mapHeight, chunkDiff)
 
 	//Start workers go generate chunks
-	for i := 0; i < workers; i++ {
+	wg.Add(1)
+	go func() {
+		for i := 0; i < workers; i++ {
 
-		//Run worker in go routine
-		StartWorker(fmt.Sprint(i), work, &wg)
+			//Run worker in go routine
+			startWorker(fmt.Sprint(i), c, &wg, dbInChan)
 
-		//Give the DB some breathing room
-		time.Sleep(1 * time.Second)
-	}
+			//Give the DB some breathing room
+			time.Sleep(10 * time.Millisecond)
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		wg.Add(1)
+		for i := 0; i < writers; i++ {
+			s := make(chan bool)
+			wStop = append(wStop, s)
+			buildWriter(s, chunkDiff*chunkDiff, dbInChan)
+		}
+		wg.Done()
+	}()
 
 	wg.Wait()
 
-}
+	//Stop the DB writers
+	for _, c := range wStop {
+		c <- true
+		close(c)
+	}
 
-func giveMeWork(wg *sync.WaitGroup) chan *Work {
-	wg.Add(1)
-	result := make(chan *Work)
-	go func() {
-		for x := 0; x < 1000; x += 50 {
-			for y := 0; y < 1000; y += 50 {
-				result <- &Work{
-					X1: x,
-					X2: x + 49,
-					Y1: y,
-					Y2: y + 49,
-				}
-			}
-		}
-		close(result)
-		wg.Done()
-	}()
-	return result
+	logrus.Infoln("Took: ", time.Since(start), "to write", atomic.AddUint64(&rowsWritten, 0), "rows")
 
 }
 
-type Work struct {
-	X1, X2, Y1, Y2 int
-}
-
-func StartWorker(name string, in chan *Work, wg *sync.WaitGroup) {
+func startWorker(name string, in chan model.Chunk, wg *sync.WaitGroup, dbChan chan *model.Tile) {
 	wg.Add(1)
 	go func() {
-		fmt.Println("Worker", name, "STARTING")
-		conn, err := db.Connect()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		for work := range in {
+		for chunk := range in {
+			chunkID := atomic.AddUint64(&ops, 1)
 			start := time.Now()
-			chunk := getTilesChunk(work.X1, work.X2, work.Y1, work.Y2)
 			ct := maps.RandomizeChunckType()
 			maps.GenerateChunk(chunk, ct)
 			for _, tile := range chunk {
-				model.InsertTile(conn, tile)
+				dbChan <- tile
 			}
-			d := time.Since(start)
-			fmt.Println("Chunk took", d, "(", ct, ")")
+			logrus.Infoln("Chunk", chunkID, "took", time.Since(start), "(", ct, ")")
 		}
 		wg.Done()
-
 	}()
 
 }
 
-func getTilesChunk(x1 int, x2 int, z1 int, z2 int) (c model.Chunk) {
-	for x := x1; x <= x2; x++ {
-		for z := z1; z <= z2; z++ {
-			t := model.Tile{
-				ID:       fmt.Sprint(x, ".", z),
-				X:        x,
-				Z:        z,
-				TileType: model.TileTypeWater,
-				TileSkin: "",
-			}
-			c = append(c, &t)
-		}
+func buildWriter(stop chan bool, max int, in chan *model.Tile) {
+	conn, err := db.Connect()
+	if err != nil {
+		logrus.Fatal(err)
 	}
+	go func() {
+		var cache model.Chunk
+		for {
+			select {
+			case <-stop:
+				copyToDB(conn, cache)
+				conn.Close()
+				return
+			case t := <-in:
+				cache = append(cache, t)
+				if cache.Size() >= max {
+					copyToDB(conn, cache)
+					cache = model.Chunk{}
+				}
+			}
+		}
+	}()
 	return
+}
+
+func copyToDB(conn *pgx.Conn, chunk model.Chunk) {
+	l := len(chunk)
+	if l == 0 {
+		return
+	}
+
+	if true {
+		logrus.Infoln("Wrote", len(chunk))
+		atomic.AddUint64(&rowsWritten, uint64(l))
+		return
+	}
+
+	rows := chunk.ToInterface()
+	copyCount, err := conn.CopyFrom(
+		pgx.Identifier{"world", "tiles"},
+		model.TileSqlCols,
+		pgx.CopyFromRows(rows),
+	)
+	logrus.Infoln("Wrote", l, "rows")
+	atomic.AddUint64(&rowsWritten, uint64(l))
+	if err != nil {
+		logrus.Fatalln(err)
+	}
+	if l != copyCount {
+		logrus.Fatalln(l, " is not equal to ", copyCount)
+	}
+
 }

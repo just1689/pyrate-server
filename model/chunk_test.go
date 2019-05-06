@@ -4,6 +4,51 @@ import (
 	"testing"
 )
 
+func TestGenerateWaterChunks(t *testing.T) {
+
+	width := 100
+	chunkWidth := 10
+	x1 := 0
+	x2 := width - 1
+	z1 := 0
+	z2 := width - 1
+
+	c := GenerateWaterChunks(x1, x2, z1, z2, chunkWidth)
+	var chunks []Chunk
+	for chunk := range c {
+		chunks = append(chunks, chunk)
+	}
+
+	if len(chunks) != 100 {
+		t.Error("Unexpected number of chunks! Not being ", 100, " and not ", len(chunks))
+	}
+
+}
+
+func TestGenerateWaterChunk(t *testing.T) {
+
+	width := 100
+	x1 := 0
+	x2 := width - 1
+	z1 := 0
+	z2 := width - 1
+
+	chunk := GenerateWaterChunk(x1, x2, z1, z2)
+
+	if len(chunk) != width*width {
+		t.Error("Chunk not the right size")
+	}
+
+	last := chunk[width*width-1]
+	if last.X != width-1 {
+		t.Error("Last tile unexpected X")
+	}
+	if last.Z != width-1 {
+		t.Error("Last tile unexpected Z")
+	}
+
+}
+
 func TestChunk_CoverInWater(t *testing.T) {
 	var c Chunk
 	c = make([]*Tile, 4)

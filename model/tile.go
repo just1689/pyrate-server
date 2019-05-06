@@ -7,11 +7,17 @@ import (
 	"time"
 )
 
+var TileSqlCols = []string{"id", "x", "z", "tile_type", "tile_skin"}
+
 type Tile struct {
 	ID       string
 	X, Z     int
 	TileType TileType
 	TileSkin string
+}
+
+func (tile *Tile) ToInterface() []interface{} {
+	return []interface{}{tile.ID, tile.X, tile.Z, tile.TileType, tile.TileSkin}
 }
 
 func (tile Tile) ToString() string {
