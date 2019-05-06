@@ -20,7 +20,7 @@ class Stash {
     static mapTilesBin = new Map()
 
     static mapOffsetX = 0
-    static mapOffsetY = 0
+    static mapOffsetZ = 0
 
     //JUNK
     static sphereMesh
@@ -219,7 +219,7 @@ function updateTileToTileObject(tileMesh, tObject) {
     tileMesh.position.y = 2
 
     tileMesh.position.x = (tObject.X + Stash.mapOffsetX) * Stash.TILE_SIZE
-    tileMesh.position.z = (tObject.Y + Stash.mapOffsetY) * Stash.TILE_SIZE
+    tileMesh.position.z = (tObject.Z + Stash.mapOffsetZ) * Stash.TILE_SIZE
     tileMesh.tag = tObject
     tileMesh.visibility = 1
 
@@ -231,7 +231,7 @@ function GarbageCollectTiles(minX, maxX, minY, maxY) {
     let marked = []
     for (let pair of Stash.mapTiles) {
         let tObject = pair[1].tag
-        if (tObject.X >= minX && tObject.X <= maxX && tObject.Y >= minY && tObject.Y <= maxY) {
+        if (tObject.X >= minX && tObject.X <= maxX && tObject.Z >= minY && tObject.Z <= maxY) {
             marked.push(tObject.ID)
         }
     }
@@ -249,14 +249,14 @@ function alignMap() {
     for (let mapRow of Stash.mapTiles) {
         let tileMesh = mapRow[1]
         tileMesh.position.x = (tileMesh.tag.X + Stash.mapOffsetX) * Stash.TILE_SIZE
-        tileMesh.position.z = (tileMesh.tag.Y + Stash.mapOffsetY) * Stash.TILE_SIZE
+        tileMesh.position.z = (tileMesh.tag.Z + Stash.mapOffsetZ) * Stash.TILE_SIZE
     }
 }
 
 
 function handleOffset(body) {
     Stash.mapOffsetX = body.X
-    Stash.mapOffsetY = body.Y
+    Stash.mapOffsetZ = body.Z
     alignMap()
 }
 
